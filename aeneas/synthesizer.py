@@ -101,6 +101,7 @@ class Synthesizer(Loggable):
         """
         self.log(u"Selecting TTS engine...")
         requested_tts_engine = self.rconf[RuntimeConfiguration.TTS]
+        self.log("Provided TTS engine: " + requested_tts_engine)
         if requested_tts_engine == self.CUSTOM:
             self.log(u"TTS engine: custom")
             tts_path = self.rconf[RuntimeConfiguration.TTS_PATH]
