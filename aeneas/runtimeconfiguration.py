@@ -242,6 +242,40 @@ class RuntimeConfiguration(Configuration):
     .. versionadded:: 1.7.0
     """
 
+    ELEVEN_LABS_API_KEY = "eleven_labs_api_key"
+    """
+    Your API KEy value to use the Eleven Labs TTS API.
+
+    You will be billed according to your Eleven Labs Developers account plan.
+
+    :data:`~aeneas.runtimeconfiguration.RuntimeConfiguration.TTS_CACHE`
+    to ``True``.
+
+    .. versionadded:: 1.5.0
+    """
+
+    ELEVEN_LABS_VOICE_ID = "eleven_labs_voice_id"
+    """
+    The Eleven Labs Voice ID to use for synthesizing text.
+
+    This ID should be created and managed in your Eleven Labs account.
+
+    """
+
+    ELEVEN_LABS_SIMILARITY_BOOST = "eleven_labs_similarity_boost"
+    """
+    Adjust the similarity boost for the Eleven Labs TTS API.
+
+    Default: ``0.75``.
+    """
+
+    ELEVEN_LABS_STABILITY = "eleven_labs_stability"
+    """
+    Adjust the stability for the Eleven Labs TTS API.
+
+    Default: ``0.75``.
+    """
+
     FFMPEG_PATH = "ffmpeg_path"
     """
     Path to the ``ffmpeg`` executable.
