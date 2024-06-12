@@ -966,6 +966,11 @@ class RuntimeConfiguration(Configuration):
         (DOWNLOADER_SLEEP, ("1.000", TimeValue, [], u"sleep between Downloader calls, in s")),
         (DOWNLOADER_RETRY_ATTEMPTS, (5, int, [], u"number of retries for a failed Downloader call")),
 
+        (ELEVEN_LABS_API_KEY, (None, None, [], u"Eleven Labs Developer API Key")),
+        (ELEVEN_LABS_VOICE_ID, (None, None, [], u"Eleven Labs Voice ID")),
+        (ELEVEN_LABS_SIMILARITY_BOOST, (0.75, float, [], u"Eleven Labs similarity boost")),
+        (ELEVEN_LABS_STABILITY, (0.75, float, [], u"Eleven Labs stability")),
+
         (FFMPEG_PATH, ("ffmpeg", None, [], u"path to ffmpeg executable")),                  # or a full path like "/usr/bin/ffmpeg"
         (FFMPEG_SAMPLE_RATE, (16000, int, [], u"ffmpeg sample rate")),
 

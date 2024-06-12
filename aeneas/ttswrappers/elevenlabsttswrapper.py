@@ -282,8 +282,8 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         payload = {
             "text": text_to_synth,
             "voice_settings": {
-                "stability": self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY],
-                "similarity_boost": self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST],
+                "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
+                "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
             }
         }
 
