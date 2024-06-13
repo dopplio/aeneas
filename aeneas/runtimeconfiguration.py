@@ -1040,6 +1040,7 @@ class RuntimeConfiguration(Configuration):
     TAG = u"RuntimeConfiguration"
 
     def __init__(self, config_string=None):
+        print("INIT RUNTIME CONFIG " + str(config_string))
         super(RuntimeConfiguration, self).__init__(config_string)
 
     @property
