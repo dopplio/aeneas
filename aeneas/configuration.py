@@ -100,6 +100,7 @@ class Configuration(object):
         self.types = {}
         self.aliases = {}
         self.desc = {}
+        print("CONFIG STRING " + config_string)
         for (field, info) in self.FIELDS:
             (fdefault, ftype, faliases, fdesc) = info
             self.data[field] = fdefault
@@ -120,6 +121,7 @@ class Configuration(object):
             # ignoring keys not present in FIELDS
             properties = gf.config_string_to_dict(config_string)
             for key in set(properties.keys()) & set(self.data.keys()):
+                print("CONFIG KEY " + str(key))
                 self.data[key] = properties[key]
 
     def __contains__(self, key):
