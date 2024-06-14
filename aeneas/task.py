@@ -77,6 +77,7 @@ class Task(Loggable):
             self.configuration = TaskConfiguration(config_string)
 
     def __unicode__(self):
+        msg = [
             u"%s: '%s'" % (gc.RPN_TASK_IDENTIFIER, self.identifier),
             u"Configuration:\n%s" % self.configuration.__unicode__(),
             u"Audio file path: %s" % self.audio_file_path,
