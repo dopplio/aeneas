@@ -266,28 +266,34 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(ElevenLabsTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-def _synthesize_single_python_helper(self, text, voice_code, return_audio_data=True, text_file=None):
-    self.log(u"Importing requests...")
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
+        self.log(u"Importing requests...")
+        import requests
+        self.log(u"Importing requests... done")
+        voice_id = self.rconf[RuntimeConfiguration.ELEVEN_LABS_VOICE_ID]
+        # prepare request header and contents
+        request_id = str(uuid.uuid4()).replace("-", "")[0:16]
+        headers = {
+            u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
+        }
 
-    voice_id = self.rconf[RuntimeConfiguration.ELEVEN_LABS_VOICE_ID]
-    headers = {
-        u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
-    }
-    url = "%s%s%s" % (self.URL, self.END_POINT, voice_id)
-    predefined_file_path = "predefined_audio_file.wav"
+        # sentence = ''
+        # with open(text_file.file_path, 'r') as file:
+        #     # Read all lines from the file
+        #     lines = file.readlines()
+        #     # Strip newline characters and join the lines into a single sentence
+        #     sentence = ' '.join(line.strip() for line in lines)
 
-    if os.path.exists(predefined_file_path):
-        self.log(u"Using saved audio file...")
-        with open(predefined_file_path, "rb") as audio_file:
-            audio_data = audio_file.read()
-    else:
-        sentence = ''
-        with open(text_file.file_path, 'r') as file:
-            # Read all lines from the file
-            lines = file.readlines()
-            # Strip newline characters and join the lines into a single sentence
-            sentence = ' '.join(line.strip() for line in lines)
-        self.log(u"Posting request to TTS API...")
+        # print("SENTENCE")
+        # print(sentence)
+
+        url = "%s%s%s" % (
+            self.URL,
+            self.END_POINT,
+            voice_id
+        )
+
+        # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
         attempts = self.rconf[RuntimeConfiguration.TTS_API_RETRY_ATTEMPTS]
         self.log([u"Sleep delay:    %.3f", sleep_delay])
@@ -298,48 +304,55 @@ def _synthesize_single_python_helper(self, text, voice_code, return_audio_data=T
             self.log(u"Sleeping to throttle API usage... done")
             self.log(u"Posting...")
             try:
-                response = requests.post(
-                    url,
+                response = requests.post(url, 
                     headers=headers,
                     json={
-                        'text': sentence,
+                        'text': text,
                         "voice_settings": {
                             "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
                             "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
                         }
                     }
                 )
-                status_code = response.status_code
-                self.log([u"Status code: %d", status_code])
-                if status_code == 200:
-                    self.log(u"Got status code 200, break")
-                    break
-                else:
-                    self.log_warn(u"Got status code other than 200, retry")
-                    attempts -= 1
             except Exception as exc:
                 self.log_exc(u"Unexpected exception on HTTP POST. Are you offline?", exc, True, ValueError)
-        
+            self.log(u"Posting... done")
+            status_code = response.status_code
+            self.log([u"Status code: %d", status_code])
+            if status_code == 200:
+                self.log(u"Got status code 200, break")
+                break
+            else:
+                self.log_warn(u"Got status code other than 200, retry")
+                attempts -= 1
+
         if attempts <= 0:
             self.log_exc(u"All API requests returned status code != 200", None, True, ValueError)
-        
-        audio_data = response.content
-        self.log(u"Saving audio data to predefined file...")
-        with wave.open(predefined_file_path, "wb") as output_file:
+
+        # save to file if requested
+        if output_file_path is None:
+            self.log(u"output_file_path is None => not saving to file")
+        else:
+            self.log(u"output_file_path is not None => saving to file...")
+            import wave
+            output_file = wave.open(output_file_path, "wb")
             output_file.setframerate(self.SAMPLE_RATE)  # sample rate
             output_file.setnchannels(1)                 # 1 channel, i.e. mono
             output_file.setsampwidth(2)                 # 16 bit/sample, i.e. 2 bytes/sample
-            output_file.writeframes(audio_data)
-        self.log(u"Saving audio data to predefined file... done")
-    
-    trimmed_length = (len(audio_data) // 2) * 2
-    number_of_frames = len(audio_data) / 2
-    audio_length = TimeValue(number_of_frames / self.SAMPLE_RATE)
-    self.log([u"Response (bytes): %d", len(audio_data)])
-    self.log([u"Number of frames: %d", number_of_frames])
-    self.log([u"Audio length (s): %.3f", audio_length])
-    audio_format = "pcm16"
-    audio_samples = numpy.fromstring(audio_data[:trimmed_length], dtype=numpy.int16).astype("float64") / 32768
+            output_file.writeframes(response.content)
+            output_file.close()
+            self.log(u"output_file_path is not None => saving to file... done")
 
-    return (True, (audio_length, self.SAMPLE_RATE, audio_format, audio_samples))
+        # get length and data
+        audio_sample_rate = self.SAMPLE_RATE
+        trimmed_length = (len(response.content) // 2) * 2
+        number_of_frames = len(response.content) / 2
+        audio_length = TimeValue(number_of_frames / audio_sample_rate)
+        self.log([u"Response (bytes): %d", len(response.content)])
+        self.log([u"Number of frames: %d", number_of_frames])
+        self.log([u"Audio length (s): %.3f", audio_length])
+        audio_format = "pcm16"
+        audio_samples = numpy.fromstring(response.content[:trimmed_length], dtype=numpy.int16).astype("float64") / 32768
 
+        # return data
+        return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))
