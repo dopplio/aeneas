@@ -277,15 +277,15 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
         }
 
-        sentence = ''
-        with open(text_file.file_path, 'r') as file:
-            # Read all lines from the file
-            lines = file.readlines()
-            # Strip newline characters and join the lines into a single sentence
-            sentence = ' '.join(line.strip() for line in lines)
+        # sentence = ''
+        # with open(text_file.file_path, 'r') as file:
+        #     # Read all lines from the file
+        #     lines = file.readlines()
+        #     # Strip newline characters and join the lines into a single sentence
+        #     sentence = ' '.join(line.strip() for line in lines)
 
-        print("SENTENCE")
-        print(sentence)
+        # print("SENTENCE")
+        # print(sentence)
 
         url = "%s%s%s" % (
             self.URL,
@@ -307,7 +307,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
                 response = requests.post(url, 
                     headers=headers,
                     json={
-                        'text': sentence,
+                        'text': text,
                         "voice_settings": {
                             "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
                             "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
