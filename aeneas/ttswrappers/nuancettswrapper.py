@@ -412,7 +412,7 @@ class NuanceTTSWrapper(BaseTTSWrapper):
             output_file.writeframes(response.content)
             output_file.close()
             self.log(u"output_file_path is not None => saving to file... done")
-
+    
         # get length and data
         audio_sample_rate = self.SAMPLE_RATE
         number_of_frames = len(response.content) / 2
