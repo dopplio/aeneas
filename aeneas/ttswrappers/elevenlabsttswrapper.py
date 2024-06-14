@@ -278,7 +278,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         }
 
         sentence = ''
-        with open(text_file, 'r') as file:
+        with open(text_file.file_path, 'r') as file:
             # Read all lines from the file
             lines = file.readlines()
             # Strip newline characters and join the lines into a single sentence
