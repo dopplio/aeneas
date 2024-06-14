@@ -277,24 +277,12 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
         }
         text_to_synth = text.encode("utf-8")
-        payload = {
-            "text": text_to_synth,
-            "voice_settings": {
-                "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
-                "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
-            }
-        }
 
         url = "%s%s%s" % (
             self.URL,
             self.END_POINT,
             voice_id
         )
-
-        print("REQUEST URL: " + url)
-        print(payload)
-        print(text_to_synth)
-        print(headers)
 
         # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
@@ -307,7 +295,16 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             self.log(u"Sleeping to throttle API usage... done")
             self.log(u"Posting...")
             try:
-                response = requests.post(url, json=payload, headers=headers)
+                response = requests.post(url, 
+                    headers=headers,
+                    json={
+                        'text': text,
+                        "voice_settings": {
+                            "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
+                            "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
+                        }
+                    }
+                )
             except Exception as exc:
                 self.log_exc(u"Unexpected exception on HTTP POST. Are you offline?", exc, True, ValueError)
             self.log(u"Posting... done")
