@@ -274,7 +274,6 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         # prepare request header and contents
         request_id = str(uuid.uuid4()).replace("-", "")[0:16]
         headers = {
-            u"Content-Type": u"text/plain; charset=utf-8",
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
             # u"Accept": u"audio/x-wav;codec=pcm;bit=16;rate=%d" % self.SAMPLE_RATE
         }
@@ -293,6 +292,10 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             voice_id
         )
 
+        print("REQUEST URL: " + url)
+        print(str(json))
+        print(str(headers))
+
         # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
         attempts = self.rconf[RuntimeConfiguration.TTS_API_RETRY_ATTEMPTS]
@@ -304,7 +307,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             self.log(u"Sleeping to throttle API usage... done")
             self.log(u"Posting...")
             try:
-                response = requests.post(url, data=payload, headers=headers)
+                response = requests.post(url, json=payload, headers=headers)
             except Exception as exc:
                 self.log_exc(u"Unexpected exception on HTTP POST. Are you offline?", exc, True, ValueError)
             self.log(u"Posting... done")
