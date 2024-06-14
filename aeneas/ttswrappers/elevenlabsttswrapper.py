@@ -294,7 +294,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
 
         print("REQUEST URL: " + url)
         print(str(json))
-        print(str(headers)
+        print(str(headers))
 
         # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
