@@ -93,7 +93,8 @@ class CustomTTSWrapper(BaseTTSWrapper):
         text,
         voice_code,
         output_file_path=None,
-        return_audio_data=True
+        return_audio_data=True,
+        text_file=None
     ):
         """
         This is an helper function to synthesize a single text fragment via a Python call.

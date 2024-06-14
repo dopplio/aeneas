@@ -351,7 +351,7 @@ class NuanceTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(NuanceTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
         self.log(u"Importing requests...")
         import requests
         self.log(u"Importing requests... done")

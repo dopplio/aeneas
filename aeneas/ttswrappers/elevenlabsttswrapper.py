@@ -284,6 +284,9 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             # Strip newline characters and join the lines into a single sentence
             sentence = ' '.join(line.strip() for line in lines)
 
+        print("SENTENCE")
+        print(sentence)
+
         url = "%s%s%s" % (
             self.URL,
             self.END_POINT,
