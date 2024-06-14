@@ -459,7 +459,7 @@ class BaseTTSWrapper(Loggable):
         self.log(u"Synthesizing multiple via a Python call... done")
         return ret
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
         """
         This is an helper function to synthesize a single text fragment via a Python call.
 
