@@ -286,7 +286,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             }
         }
 
-        url = "%s/%s/%s" % (
+        url = "%s%s%s" % (
             self.URL,
             self.END_POINT,
             voice_id
@@ -294,7 +294,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
 
         print("REQUEST URL: " + url)
         print(str(json))
-        print(str(headers))
+        print(str(headers)
 
         # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
@@ -307,7 +307,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             self.log(u"Sleeping to throttle API usage... done")
             self.log(u"Posting...")
             try:
-                response = requests.post(url, json=payload, headers=headers)
+                response = requests.post(url, data=payload, headers=headers)
             except Exception as exc:
                 self.log_exc(u"Unexpected exception on HTTP POST. Are you offline?", exc, True, ValueError)
             self.log(u"Posting... done")
