@@ -100,7 +100,7 @@ class Configuration(object):
         self.types = {}
         self.aliases = {}
         self.desc = {}
-        print("CONFIG STRING " + str(config_string))
+
         for (field, info) in self.FIELDS:
             (fdefault, ftype, faliases, fdesc) = info
             self.data[field] = fdefault
