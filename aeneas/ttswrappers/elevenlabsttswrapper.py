@@ -266,7 +266,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(ElevenLabsTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
         self.log(u"Importing requests...")
         import requests
         self.log(u"Importing requests... done")
@@ -276,7 +276,13 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         headers = {
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
         }
-        text_to_synth = text.encode("utf-8")
+
+        sentence = ''
+        with open(text_file, 'r') as file:
+            # Read all lines from the file
+            lines = file.readlines()
+            # Strip newline characters and join the lines into a single sentence
+            sentence = ' '.join(line.strip() for line in lines)
 
         url = "%s%s%s" % (
             self.URL,
@@ -298,7 +304,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
                 response = requests.post(url, 
                     headers=headers,
                     json={
-                        'text': text,
+                        'text': sentence,
                         "voice_settings": {
                             "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
                             "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
