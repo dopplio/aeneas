@@ -63,36 +63,30 @@ from aeneas.ttswrappers.basettswrapper import BaseTTSWrapper
 import aeneas.globalfunctions as gf
 
 
-class AWSTTSWrapper(BaseTTSWrapper):
+class ElevenLabsTTSWrapper(BaseTTSWrapper):
     """
-    A wrapper for the AWS Polly TTS API.
+    A wrapper for the Eleven Labs API.
 
     This wrapper supports calling the TTS engine
     only via Python.
 
     In abstract terms, it performs one or more calls to the
-    AWS Polly TTS API service, and concatenate the resulting WAVE files,
+    Eleven Labs TTS API service, and concatenate the resulting WAVE files,
     returning their anchor times.
 
     To use this TTS engine, specify ::
 
-        "tts=aws"
+        "tts=elevenlabs"
 
     in the ``RuntimeConfiguration`` object.
 
     Your AWS credentials and configuration settings
-    to access the AWS Polly service must be
-    either stored on disk
-    (e.g., in ``~/.aws/credentials`` and ``~/.aws/config``)
-    or set in environment variables.
-    Please refer to
-    http://boto3.readthedocs.io/en/latest/guide/configuration.html
-    for further details.
+    substituting your Eleven Labs Developer API ID and Key.
 
     You might also want to enable the TTS caching,
     to reduce the number of API calls ::
 
-        "tts=aws|tts_cache=True"
+        "tts=elevenlabs|tts_cache=True"
 
     See :class:`~aeneas.ttswrappers.basettswrapper.BaseTTSWrapper`
     for the available functions.
@@ -263,48 +257,67 @@ class AWSTTSWrapper(BaseTTSWrapper):
     SAMPLE_RATE = 16000
     """ Synthesize 16kHz PCM16 mono """
 
-    TAG = u"AWSTTSWrapper"
+    TAG = u"ElevenLabsTTSWrapper"
+
+    URL = "https://api.elevenlabs.io"
+
+    END_POINT = "/v1/text-to-speech/"
 
     def __init__(self, rconf=None, logger=None):
-        super(AWSTTSWrapper, self).__init__(rconf=rconf, logger=logger)
+        super(ElevenLabsTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
     def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
-        self.log(u"Importing boto3...")
-        import boto3
-        self.log(u"Importing boto3... done")
+        self.log(u"Importing requests...")
+        import requests
+        self.log(u"Importing requests... done")
+        voice_id = self.rconf[RuntimeConfiguration.ELEVEN_LABS_VOICE_ID]
+        # prepare request header and contents
+        request_id = str(uuid.uuid4()).replace("-", "")[0:16]
+        headers = {
+            u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
+        }
 
-        # prepare client
-        polly_client = boto3.client("polly")
+        # sentence = ''
+        # with open(text_file.file_path, 'r') as file:
+        #     # Read all lines from the file
+        #     lines = file.readlines()
+        #     # Strip newline characters and join the lines into a single sentence
+        #     sentence = ' '.join(line.strip() for line in lines)
+
+        # print("SENTENCE")
+        # print(sentence)
+
+        url = "%s%s%s" % (
+            self.URL,
+            self.END_POINT,
+            voice_id
+        )
 
         # post request
         sleep_delay = self.rconf[RuntimeConfiguration.TTS_API_SLEEP]
         attempts = self.rconf[RuntimeConfiguration.TTS_API_RETRY_ATTEMPTS]
         self.log([u"Sleep delay:    %.3f", sleep_delay])
         self.log([u"Retry attempts: %d", attempts])
-
         while attempts > 0:
             self.log(u"Sleeping to throttle API usage...")
             time.sleep(sleep_delay)
             self.log(u"Sleeping to throttle API usage... done")
             self.log(u"Posting...")
             try:
-                response = polly_client.synthesize_speech(
-                    Text=text,
-                    OutputFormat=self.SAMPLE_FORMAT,
-                    SampleRate="%d" % self.SAMPLE_RATE,
-                    VoiceId=voice_code
+                response = requests.post(url, 
+                    headers=headers,
+                    json={
+                        'text': text,
+                        "voice_settings": {
+                            "stability": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_STABILITY]),
+                            "similarity_boost": str(self.rconf[RuntimeConfiguration.ELEVEN_LABS_SIMILARITY_BOOST]),
+                        }
+                    }
                 )
             except Exception as exc:
                 self.log_exc(u"Unexpected exception on HTTP POST. Are you offline?", exc, True, ValueError)
             self.log(u"Posting... done")
-            self.log(u"Reading response...")
-            try:
-                status_code = response["ResponseMetadata"]["HTTPStatusCode"]
-                response_content = response["AudioStream"].read()
-            except Exception as exc:
-                self.log_warn(u"Error while reading the response status code or the response content")
-                status_code = 999
-            self.log(u"Reading response... done")
+            status_code = response.status_code
             self.log([u"Status code: %d", status_code])
             if status_code == 200:
                 self.log(u"Got status code 200, break")
@@ -326,19 +339,20 @@ class AWSTTSWrapper(BaseTTSWrapper):
             output_file.setframerate(self.SAMPLE_RATE)  # sample rate
             output_file.setnchannels(1)                 # 1 channel, i.e. mono
             output_file.setsampwidth(2)                 # 16 bit/sample, i.e. 2 bytes/sample
-            output_file.writeframes(response_content)
+            output_file.writeframes(response.content)
             output_file.close()
             self.log(u"output_file_path is not None => saving to file... done")
 
         # get length and data
         audio_sample_rate = self.SAMPLE_RATE
-        number_of_frames = len(response_content) / 2
+        trimmed_length = (len(response.content) // 2) * 2
+        number_of_frames = len(response.content) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
-        self.log([u"Response (bytes): %d", len(response_content)])
+        self.log([u"Response (bytes): %d", len(response.content)])
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.fromstring(response_content, dtype=numpy.int16).astype("float64") / 32768
+        audio_samples = numpy.fromstring(response.content[:trimmed_length], dtype=numpy.int16).astype("float64") / 32768
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))

@@ -351,7 +351,7 @@ class NuanceTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(NuanceTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
         self.log(u"Importing requests...")
         import requests
         self.log(u"Importing requests... done")
@@ -412,7 +412,7 @@ class NuanceTTSWrapper(BaseTTSWrapper):
             output_file.writeframes(response.content)
             output_file.close()
             self.log(u"output_file_path is not None => saving to file... done")
-
+    
         # get length and data
         audio_sample_rate = self.SAMPLE_RATE
         number_of_frames = len(response.content) / 2

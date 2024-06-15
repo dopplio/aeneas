@@ -248,11 +248,13 @@ class Task(Loggable):
         Create the ``self.text_file`` object by reading
         the text file at ``self.text_file_path_absolute``.
         """
+        print("Populating text file...")
         self.log(u"Populate text file...")
         if (
                 (self.text_file_path_absolute is not None) and
                 (self.configuration["language"] is not None)
         ):
+            print("Have path and language, setup text file")
             # the following values might be None
             parameters = {
                 gc.PPN_TASK_IS_TEXT_FILE_IGNORE_REGEX: self.configuration["i_t_ignore_regex"],
@@ -266,14 +268,17 @@ class Task(Loggable):
                 gc.PPN_TASK_IS_TEXT_UNPARSED_ID_SORT: self.configuration["i_t_unparsed_id_sort"],
                 gc.PPN_TASK_OS_FILE_ID_REGEX: self.configuration["o_id_regex"]
             }
+            print("Creating TextFile")
             self.text_file = TextFile(
                 file_path=self.text_file_path_absolute,
                 file_format=self.configuration["i_t_format"],
                 parameters=parameters,
                 logger=self.logger
             )
+            print("Setting language on TextFile")
             self.text_file.set_language(self.configuration["language"])
         else:
+            print(u"text_file_path_absolute and/or language is None")
             self.log(u"text_file_path_absolute and/or language is None")
         self.log(u"Populate text file... done")
 

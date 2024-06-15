@@ -43,6 +43,7 @@ from aeneas.ttswrappers.espeakttswrapper import ESPEAKTTSWrapper
 from aeneas.ttswrappers.festivalttswrapper import FESTIVALTTSWrapper
 from aeneas.ttswrappers.macosttswrapper import MacOSTTSWrapper
 from aeneas.ttswrappers.nuancettswrapper import NuanceTTSWrapper
+from aeneas.ttswrappers.elevenlabsttswrapper import ElevenLabsTTSWrapper
 import aeneas.globalfunctions as gf
 
 
@@ -85,7 +86,10 @@ class Synthesizer(Loggable):
     NUANCE = "nuance"
     """ Select Nuance TTS API wrapper """
 
-    ALLOWED_VALUES = [AWS, CUSTOM, ESPEAK, ESPEAKNG, FESTIVAL, MACOS, NUANCE]
+    ELEVENLABS = "elevenlabs"
+    """ Select Eleven Labs TTS API wrapper """
+
+    ALLOWED_VALUES = [AWS, CUSTOM, ESPEAK, ESPEAKNG, FESTIVAL, MACOS, NUANCE, ELEVENLABS]
     """ List of all the allowed values """
 
     TAG = u"Synthesizer"
@@ -129,6 +133,13 @@ class Synthesizer(Loggable):
                 self.log_exc(u"Unable to import boto3 for AWS Polly TTS API wrapper", exc, True, ImportError)
             self.log(u"TTS engine: AWS Polly TTS API")
             self.tts_engine = AWSTTSWrapper(rconf=self.rconf, logger=self.logger)
+        elif requested_tts_engine == self.ELEVENLABS:
+            try:
+                import requests
+            except ImportError as exc:
+                self.log_exc(u"Unable to import requests for Eleven Labs TTS API wrapper", exc, True, ImportError)
+            self.log(u"TTS engine: Eleven Labs TTS API")
+            self.tts_engine = ElevenLabsTTSWrapper(rconf=self.rconf, logger=self.logger)
         elif requested_tts_engine == self.NUANCE:
             try:
                 import requests
