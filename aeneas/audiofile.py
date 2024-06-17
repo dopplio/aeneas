@@ -450,8 +450,7 @@ class AudioFile(Loggable):
             self.__samples_capacity = len(self.__samples)
             self.__samples_length = self.__samples_capacity
             self._update_length()
-        except Exception as e:
-            print(e)
+        except ValueError:
             self.log_exc(u"Audio format not supported by scipywavread", None, True, AudioFileUnsupportedFormatError)
 
         # if we converted the audio file, delete the temporary converted audio file

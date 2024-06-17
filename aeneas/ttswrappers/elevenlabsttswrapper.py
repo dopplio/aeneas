@@ -266,7 +266,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(ElevenLabsTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
         self.log(u"Importing requests...")
         import requests
         self.log(u"Importing requests... done")
@@ -276,16 +276,6 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         headers = {
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
         }
-
-        # sentence = ''
-        # with open(text_file.file_path, 'r') as file:
-        #     # Read all lines from the file
-        #     lines = file.readlines()
-        #     # Strip newline characters and join the lines into a single sentence
-        #     sentence = ' '.join(line.strip() for line in lines)
-
-        # print("SENTENCE")
-        # print(sentence)
 
         url = "%s%s%s" % (
             self.URL,
