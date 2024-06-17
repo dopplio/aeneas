@@ -352,10 +352,14 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
 
+        # Create a new byte array with padding
         if len(response.content) % 2 != 0:
-            response.content += b'\x00'
+            print("padding content")
+            padded_content = response.content + b'\x00'
+        else:
+            padded_content = response.content
 
-        audio_samples = numpy.fromstring(response.content, dtype=numpy.int16).astype("float64") / 32768
+        audio_samples = numpy.fromstring(padded_content, dtype=numpy.int16).astype("float64") / 32768
 
 
 
