@@ -351,7 +351,13 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.frombuffer(response.content, dtype=numpy.int16).astype("float64") / 32768
+
+        if len(response.content) % 2 != 0:
+            response.content += b'\x00'
+
+        audio_samples = numpy.fromstring(response.content, dtype=numpy.int16).astype("float64") / 32768
+
+
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))
