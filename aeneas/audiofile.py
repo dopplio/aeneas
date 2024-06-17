@@ -439,6 +439,8 @@ class AudioFile(Loggable):
 
         # TODO allow calling C extension cwave to read samples faster
         try:
+            print("TMP FILE")
+            print(tmp_file_path)
             self.audio_format = "pcm16"
             self.audio_channels = 1
             self.audio_sample_rate, self.__samples = scipywavread(tmp_file_path)
