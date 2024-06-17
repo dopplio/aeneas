@@ -121,7 +121,7 @@ class Configuration(object):
             # ignoring keys not present in FIELDS
             properties = gf.config_string_to_dict(config_string)
             for key in set(properties.keys()) & set(self.data.keys()):
-                print("CONFIG KEY " + str(key))
+                print("CONFIG KEY " + str(key) + " Value " + str(properties[key]))
                 self.data[key] = properties[key]
 
     def __contains__(self, key):
