@@ -51,6 +51,9 @@ for further details.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import os
+import subprocess
+import tempfile
 import numpy
 import time
 import uuid
@@ -274,7 +277,8 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         # prepare request header and contents
         request_id = str(uuid.uuid4()).replace("-", "")[0:16]
         headers = {
-            u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
+            u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY],
+            u"Accept": u"audio/x-wav;codec=pcm;bit=16;rate=%d" % self.SAMPLE_RATE
         }
 
         # sentence = ''
@@ -343,19 +347,82 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             output_file.close()
             self.log(u"output_file_path is not None => saving to file... done")
 
-        # get length and data
+     
+        # audio_sample_rate = self.SAMPLE_RATE
+        # number_of_frames = len(response.content) // 2
+
+        # if len(response.content) % 2 != 0:
+        #     trimmed_result = self.trim_last_frame(response.content, number_of_frames)
+        #     number_of_frames = len(trimmed_result) / 2
+        # else:
+        #     trimmed_result = response.content
+        #     number_of_frames = len(response.content) / 2
+            
+
+        # audio_length = TimeValue(number_of_frames / audio_sample_rate)
+        # self.log([u"Response (bytes): %d", len(response.content)])
+        # self.log([u"Number of frames: %d", number_of_frames])
+        # self.log([u"Audio length (s): %.3f", audio_length])
+        # audio_format = "pcm16"
+        # audio_samples = numpy.fromstring(trimmed_result, dtype=numpy.int16).astype("float64") / 32768
+
         audio_sample_rate = self.SAMPLE_RATE
-        if len(response.content) % 2 != 0:
-            trimmed_length = (len(response.content) // 2) * 2
-        else:
-            trimmed_length = len(response.content)
-        number_of_frames = trimmed_length / 2
+        number_of_frames = len(response.content) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
-        self.log([u"Response (bytes): %d", trimmed_length])
+        self.log([u"Response (bytes): %d", len(response.content)])
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.fromstring(response.content[:trimmed_length], dtype=numpy.int16).astype("float64") / 32768
+        audio_samples = numpy.fromstring(response.content, dtype=numpy.int16).astype("float64") / 32768
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))
+
+   
+    
+    def trim_last_frame(content, number_of_frames):
+           # Create a temporary file to store the audio content
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio_file:
+            temp_audio_file.write(content)
+            temp_audio_file_path = temp_audio_file.name
+            
+        # Prepare to trim the last frame using ffmpeg
+        output_audio_file_path = temp_audio_file_path.replace('.wav', '_trimmed.wav')
+        arguments = [
+            "ffmpeg",
+            "-i", temp_audio_file_path,
+            "-af", f"atrim=end_sample={number_of_frames - 1}",
+            output_audio_file_path
+        ]
+
+        # Call ffmpeg with the arguments
+        try:
+            proc = subprocess.Popen(
+                arguments,
+                stdout=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            proc.communicate()
+            proc.stdout.close()
+            proc.stdin.close()
+            proc.stderr.close()
+
+            # Read the processed audio file
+            with open(output_audio_file_path, 'rb') as f:
+                processed_audio_data = f.read()
+
+            # Clean up temporary files
+            os.remove(temp_audio_file_path)
+            os.remove(output_audio_file_path)
+        except Exception as e:
+            print(f"An error occurred while processing the audio file: {e}")
+            # Clean up temporary files in case of error
+            if os.path.exists(temp_audio_file_path):
+                os.remove(temp_audio_file_path)
+            if os.path.exists(output_audio_file_path):
+                os.remove(output_audio_file_path)
+            processed_audio_data = None
+        
+        return processed_audio_data
+
