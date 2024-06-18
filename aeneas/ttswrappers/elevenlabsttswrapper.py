@@ -371,15 +371,28 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         with open(input_file_path, "wb") as input_file:
             input_file.write(response.content)
 
-        command = [
+        arguements = [
             'ffmpeg',
             '-i', input_file_path,
             '-c:a', 'pcm_s16le',
             '-ar', str(self.SAMPLE_RATE),
             output_file_path
         ]
-
-        subprocess.run(command)
+        
+        try:
+            proc = subprocess.Popen(
+                arguements,
+                stdout=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            proc.communicate()
+            proc.stdout.close()
+            proc.stdin.close()
+            proc.stderr.close()
+        except OSError as exc:
+            self.log_exc(u"Unable to call the '%s' ffmpeg executable" % (self.rconf[RuntimeConfiguration.FFMPEG_PATH]), exc, True, FFMPEGPathError)
+        self.log(u"Call completed")
 
         audio_sample_rate = self.SAMPLE_RATE
         number_of_frames = len(output_file_path) / 2
