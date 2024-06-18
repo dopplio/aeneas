@@ -77,6 +77,9 @@ def _read_data_chunk(fid, comp, noc, bits, mmap=False):
     if not mmap:
         print("SIZE")
         print(size)
+        if size % 2 != 0:
+            size =- 1
+            print("NEW SIZE " + size)
         data = numpy.fromstring(fid.read(size), dtype=dtype)
     else:
         start = fid.tell()
