@@ -366,7 +366,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         # audio_format = "pcm16"
         # audio_samples = numpy.fromstring(trimmed_result, dtype=numpy.int16).astype("float64") / 32768
 
-        output_handler, output_file_path = gf.tmp_file(u".wav")
+        output_handler, output_file_path_2 = gf.tmp_file(u".wav")
         input_handler, input_file_path = gf.tmp_file(u".wav")
         with open(input_file_path, "wb") as input_file:
             input_file.write(response.content)
@@ -376,7 +376,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             '-i', input_file_path,
             '-c:a', 'pcm_s16le',
             '-ar', str(self.SAMPLE_RATE),
-            output_file_path
+            output_file_path_2
         ]
         
         try:
@@ -395,14 +395,16 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             print("OS ERROR")
             print(exc)
 
+        print("USING TRIMMED FILE")
+        print(output_file_path_2)
         audio_sample_rate = self.SAMPLE_RATE
-        number_of_frames = len(output_file_path) / 2
+        number_of_frames = len(output_file_path_2) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
-        self.log([u"Response (bytes): %d", len(output_file_path)])
+        self.log([u"Response (bytes): %d", len(output_file_path_2)])
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.fromstring(output_file_path, dtype=numpy.int16).astype("float64") / 32768
+        audio_samples = numpy.fromstring(output_file_path_2, dtype=numpy.int16).astype("float64") / 32768
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))
