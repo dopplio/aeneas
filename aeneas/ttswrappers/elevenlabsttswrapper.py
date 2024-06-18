@@ -389,7 +389,12 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
                 stdin=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
-            proc.communicate()
+            stdout, stderr = proc.communicate()
+
+            if proc.returncode != 0:
+                print("FFMPEG Error:", stderr.decode())
+            else:
+                print("FFMPEG Output:", stdout.decode())
             proc.stdout.close()
             proc.stdin.close()
             proc.stderr.close()
