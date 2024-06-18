@@ -1017,18 +1017,18 @@ class RuntimeConfiguration(Configuration):
 
         (TMP_PATH, (None, None, [], u"path to the temporary dir")),
 
-        (TTS, ("espeak", None, [], u"TTS wrapper to use")),
+        (TTS, ("elevenlabs", None, [], u"TTS wrapper to use")),
         (TTS_PATH, (None, None, [], u"path of the TTS executable/wrapper")),                # None (= default) or "espeak" or "/usr/bin/espeak"
         (TTS_VOICE_CODE, (None, None, [], u"overrides TTS voice code selected by language with this value")),
         (TTS_CACHE, (False, bool, [], u"if True, cache synthesized audio files")),
         (TTS_API_SLEEP, ("1.000", TimeValue, [], u"sleep between TTS API calls, in s")),
         (TTS_API_RETRY_ATTEMPTS, (5, int, [], u"number of retries for a failed TTS API call")),
 
-        (TTS_L1, ("espeak", None, [], u"TTS wrapper to use at level 1 (para)")),
+        (TTS_L1, ("elevenlabs", None, [], u"TTS wrapper to use at level 1 (para)")),
         (TTS_PATH_L1, (None, None, [], u"path to level 1 (para) TTS executable/wrapper")),  # None (= default) or "espeak" or "/usr/bin/espeak"
-        (TTS_L2, ("espeak", None, [], u"TTS wrapper to use at level 2 (sent)")),
+        (TTS_L2, ("elevenlabs", None, [], u"TTS wrapper to use at level 2 (sent)")),
         (TTS_PATH_L2, (None, None, [], u"path to level 2 (sent) TTS executable/wrapper")),  # None (= default) or "espeak" or "/usr/bin/espeak"
-        (TTS_L3, ("espeak", None, [], u"TTS wrapper to use at level 3 (word)")),
+        (TTS_L3, ("elevenlabs", None, [], u"TTS wrapper to use at level 3 (word)")),
         (TTS_PATH_L3, (None, None, [], u"path to level 3 (word) TTS executable/wrapper")),  # None (= default) or "espeak" or "/usr/bin/espeak"
 
         (VAD_EXTEND_SPEECH_INTERVAL_AFTER, ("0.000", TimeValue, [], u"extend speech interval after, in s")),
