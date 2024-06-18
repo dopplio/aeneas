@@ -345,7 +345,10 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
 
         # get length and data
         audio_sample_rate = self.SAMPLE_RATE
-        trimmed_length = (len(response.content) // 2) * 2
+        if len(response.content) % 2 != 0:
+            trimmed_length = (len(response.content) // 2) * 2
+        else:
+            trimmed_length = len(response.content)
         number_of_frames = len(response.content) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
         self.log([u"Response (bytes): %d", len(response.content)])
