@@ -451,6 +451,7 @@ class BaseTTSWrapper(Loggable):
         self.log(u"Synthesizing multiple via a Python call...")
         ret = self._synthesize_multiple_generic(
             helper_function=self._synthesize_single_python_helper,
+            text_file=text_file,
             output_file_path=output_file_path,
             quit_after=quit_after,
             backwards=backwards
@@ -501,6 +502,7 @@ class BaseTTSWrapper(Loggable):
         self.log(u"Synthesizing multiple via subprocess...")
         ret = self._synthesize_multiple_generic(
             helper_function=self._synthesize_single_subprocess_helper,
+            text_file=text_file
             output_file_path=output_file_path,
             quit_after=quit_after,
             backwards=backwards
