@@ -83,7 +83,7 @@ def _read_data_chunk(fid, comp, noc, bits, mmap=False):
             data = numpy.fromstring(fid.read(size), dtype=dtype)
         else:
             new_size = size - 1
-            print("NEW SIZE " + size)
+            print("NEW SIZE " + str(size))
             data = numpy.fromstring(fid.read(new_size), dtype=dtype)
     else:
         start = fid.tell()
