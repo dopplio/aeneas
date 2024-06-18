@@ -371,8 +371,10 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         with open(input_file_path, "wb") as input_file:
             input_file.write(response.content)
 
+        print("FFMPEG PATH")
+        print(self.rconf[RuntimeConfiguration.FFMPEG_PATH])
         arguements = [
-            'ffmpeg',
+            self.rconf[RuntimeConfiguration.FFMPEG_PATH],
             '-i', input_file_path,
             '-c:a', 'pcm_s16le',
             '-ar', str(self.SAMPLE_RATE),
