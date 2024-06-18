@@ -380,6 +380,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         ]
         
         try:
+            print("CALLING FFMPEG")
             proc = subprocess.Popen(
                 arguements,
                 stdout=subprocess.PIPE,
@@ -391,8 +392,8 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
             proc.stdin.close()
             proc.stderr.close()
         except OSError as exc:
-            self.log_exc(u"Unable to call the '%s' ffmpeg executable" % (self.rconf[RuntimeConfiguration.FFMPEG_PATH]), exc, True, FFMPEGPathError)
-        self.log(u"Call completed")
+            print("OS ERROR")
+            print(exc)
 
         audio_sample_rate = self.SAMPLE_RATE
         number_of_frames = len(output_file_path) / 2
