@@ -366,14 +366,29 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         # audio_format = "pcm16"
         # audio_samples = numpy.fromstring(trimmed_result, dtype=numpy.int16).astype("float64") / 32768
 
+        output_handler, output_file_path = gf.tmp_file(u".wav")
+        input_handler, input_file_path = gf.tmp_file(u".wav")
+        with open(input_file_path, "wb") as input_file:
+            input_file.write(response.content)
+
+        command = [
+            'ffmpeg',
+            '-i', input_file_path,
+            '-c:a', 'pcm_s16le',
+            '-ar', str(self.SAMPLE_RATE),
+            output_file_path
+        ]
+
+        subprocess.run(command)
+
         audio_sample_rate = self.SAMPLE_RATE
-        number_of_frames = len(response.content) / 2
+        number_of_frames = len(output_file_path) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
-        self.log([u"Response (bytes): %d", len(response.content)])
+        self.log([u"Response (bytes): %d", len(output_file_path)])
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.fromstring(response.content, dtype=numpy.int16).astype("float64") / 32768
+        audio_samples = numpy.fromstring(output_file_path, dtype=numpy.int16).astype("float64") / 32768
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))
