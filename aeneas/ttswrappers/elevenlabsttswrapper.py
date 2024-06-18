@@ -266,7 +266,7 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
     def __init__(self, rconf=None, logger=None):
         super(ElevenLabsTTSWrapper, self).__init__(rconf=rconf, logger=logger)
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
         self.log(u"Importing requests...")
         import requests
         self.log(u"Importing requests... done")
@@ -276,16 +276,6 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
         headers = {
             u"xi-api-key": self.rconf[RuntimeConfiguration.ELEVEN_LABS_API_KEY]
         }
-
-        # sentence = ''
-        # with open(text_file.file_path, 'r') as file:
-        #     # Read all lines from the file
-        #     lines = file.readlines()
-        #     # Strip newline characters and join the lines into a single sentence
-        #     sentence = ' '.join(line.strip() for line in lines)
-
-        # print("SENTENCE")
-        # print(sentence)
 
         url = "%s%s%s" % (
             self.URL,
@@ -345,14 +335,23 @@ class ElevenLabsTTSWrapper(BaseTTSWrapper):
 
         # get length and data
         audio_sample_rate = self.SAMPLE_RATE
-        trimmed_length = (len(response.content) // 2) * 2
         number_of_frames = len(response.content) / 2
         audio_length = TimeValue(number_of_frames / audio_sample_rate)
         self.log([u"Response (bytes): %d", len(response.content)])
         self.log([u"Number of frames: %d", number_of_frames])
         self.log([u"Audio length (s): %.3f", audio_length])
         audio_format = "pcm16"
-        audio_samples = numpy.fromstring(response.content[:trimmed_length], dtype=numpy.int16).astype("float64") / 32768
+
+        # Create a new byte array with padding
+        if len(response.content) % 2 != 0:
+            print("padding content")
+            padded_content = response.content + b'\x00'
+        else:
+            padded_content = response.content
+
+        audio_samples = numpy.fromstring(padded_content, dtype=numpy.int16).astype("float64") / 32768
+
+
 
         # return data
         return (True, (audio_length, audio_sample_rate, audio_format, audio_samples))

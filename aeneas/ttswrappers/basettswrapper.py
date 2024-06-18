@@ -459,7 +459,7 @@ class BaseTTSWrapper(Loggable):
         self.log(u"Synthesizing multiple via a Python call... done")
         return ret
 
-    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True, text_file=None):
+    def _synthesize_single_python_helper(self, text, voice_code, output_file_path=None, return_audio_data=True):
         """
         This is an helper function to synthesize a single text fragment via a Python call.
 
@@ -719,8 +719,7 @@ class BaseTTSWrapper(Loggable):
             succeeded, data = loop_function(
                 helper_function=helper_function,
                 num=num,
-                fragment=fragment,
-                text_file=text_file
+                fragment=fragment
             )
             if not succeeded:
                 self.log_crit(u"An unexpected error occurred in loop_function")
@@ -767,7 +766,7 @@ class BaseTTSWrapper(Loggable):
         self.log(u"Calling TTS engine using multiple generic function... done")
         return (True, (anchors, current_time, num_chars))
 
-    def _loop_no_cache(self, helper_function, num, fragment, text_file):
+    def _loop_no_cache(self, helper_function, num, fragment):
         """ Synthesize all fragments without using the cache """
         self.log([u"Examining fragment %d (no cache)...", num])
         # synthesize and get the duration of the output file
@@ -777,8 +776,7 @@ class BaseTTSWrapper(Loggable):
             text=fragment.filtered_text,
             voice_code=voice_code,
             output_file_path=None,
-            return_audio_data=True,
-            text_file=text_file
+            return_audio_data=True
         )
         # check output
         if not succeeded:
@@ -787,7 +785,7 @@ class BaseTTSWrapper(Loggable):
         self.log([u"Examining fragment %d (no cache)... done", num])
         return (True, data)
 
-    def _loop_use_cache(self, helper_function, num, fragment, text_file):
+    def _loop_use_cache(self, helper_function, num, fragment):
         """ Synthesize all fragments using the cache """
         self.log([u"Examining fragment %d (cache)...", num])
         fragment_info = (fragment.language, fragment.filtered_text)
@@ -817,8 +815,7 @@ class BaseTTSWrapper(Loggable):
                 text=fragment.filtered_text,
                 voice_code=voice_code,
                 output_file_path=file_path,
-                return_audio_data=True,
-                text_file=text_file
+                return_audio_data=True
             )
             # check output
             if not succeeded:
