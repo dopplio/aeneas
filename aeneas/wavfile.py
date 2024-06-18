@@ -75,7 +75,15 @@ def _read_data_chunk(fid, comp, noc, bits, mmap=False):
         else:
             dtype += 'f%d' % bytes
     if not mmap:
-        data = numpy.fromstring(fid.read(size), dtype=dtype)
+        print("SIZE")
+        print(size)
+        print(size % 2)
+        if size % 2 != 0:
+            new_size = size - 1
+            print("NEW SIZE " + size)
+            data = numpy.fromstring(fid.read(new_size), dtype=dtype)
+        else:
+            data = numpy.fromstring(fid.read(size), dtype=dtype)
     else:
         start = fid.tell()
         data = numpy.memmap(fid, dtype=dtype, mode='c', offset=start,
@@ -167,28 +175,38 @@ def read(filename, mmap=False):
         bits = 8
         comp = WAVE_FORMAT_PCM
         while (fid.tell() < fsize):
+            print("while")
             # read the next chunk
             chunk_id = fid.read(4)
             if chunk_id == b'fmt ':
+                print("fmt")
                 size, comp, noc, rate, sbytes, ba, bits = _read_fmt_chunk(fid)
                 if bits == 24:
+                    print("VALUE ERR")
                     raise ValueError("Unsupported bit depth: the wav file "
                                      "has 24 bit data.")
             elif chunk_id == b'fact':
+                print("fact")
                 _skip_unknown_chunk(fid)
             elif chunk_id == b'data':
+                print("data")
                 data = _read_data_chunk(fid, comp, noc, bits, mmap=mmap)
             elif chunk_id == b'LIST':
+                print("list")
                 # Someday this could be handled properly but for now skip it
                 _skip_unknown_chunk(fid)
             else:
+                print("warning")
                 warnings.warn("Chunk (non-data) not understood, skipping it.",
                               WavFileWarning)
                 _skip_unknown_chunk(fid)
     finally:
+        print("finally")
         if not hasattr(filename, 'read'):
+            print("close")
             fid.close()
         else:
+            print('seek')
             fid.seek(0)
 
     return rate, data

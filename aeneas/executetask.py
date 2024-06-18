@@ -199,9 +199,10 @@ class ExecuteTask(Loggable):
             (head_length, process_length, tail_length) = self._compute_head_process_tail(real_wave_mfcc)
             real_wave_mfcc.set_head_middle_tail(head_length, process_length, tail_length)
             self._step_end()
-
+            print("Clearing")
             # compute alignment, outputting a tree of time intervals
             self._set_synthesizer()
+            self._clear_cache_synthesizer()
             sync_root = Tree()
             self._execute_inner(
                 real_wave_mfcc,

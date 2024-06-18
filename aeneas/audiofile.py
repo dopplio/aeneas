@@ -439,16 +439,21 @@ class AudioFile(Loggable):
 
         # TODO allow calling C extension cwave to read samples faster
         try:
+            print(tmp_file_path)
             self.audio_format = "pcm16"
+            print(self.audio_format)
             self.audio_channels = 1
+            print(self.audio_channels)
             self.audio_sample_rate, self.__samples = scipywavread(tmp_file_path)
+            print("after read")
             # scipy reads a sample as an int16_t, that is, a number in [-32768, 32767]
             # so we convert it to a float64 in [-1, 1]
             self.__samples = self.__samples.astype("float64") / 32768
             self.__samples_capacity = len(self.__samples)
             self.__samples_length = self.__samples_capacity
             self._update_length()
-        except ValueError:
+        except ValueError as ve:
+            print(ve)
             self.log_exc(u"Audio format not supported by scipywavread", None, True, AudioFileUnsupportedFormatError)
 
         # if we converted the audio file, delete the temporary converted audio file
